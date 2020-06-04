@@ -42,29 +42,6 @@ namespace Asteroids.Objects
                 }
 
                 Transform.Position += Transform.Forward * GameEngine.deltaTime * 400;
-
-                BorderWrap();
-            }
-        }
-
-        public void BorderWrap()
-        {
-            if (Transform.Position.Y < (-GameEngine.WINDOW_HEIGHT / 2) - 1)
-            {
-                Transform.Position.Y += GameEngine.WINDOW_HEIGHT + 2;
-            }
-            else if (Transform.Position.Y > (GameEngine.WINDOW_HEIGHT / 2) + 1)
-            {
-                Transform.Position.Y -= GameEngine.WINDOW_HEIGHT + 2;
-            }
-
-            if (Transform.Position.X < (-GameEngine.WINDOW_WIDTH / 2) - 1)
-            {
-                Transform.Position.X += GameEngine.WINDOW_WIDTH + 2;
-            }
-            else if (Transform.Position.X > (GameEngine.WINDOW_WIDTH / 2) + 1)
-            {
-                Transform.Position.X -= GameEngine.WINDOW_WIDTH + 2;
             }
         }
 

@@ -5,8 +5,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using System;
-
 namespace Asteroids.Objects
 {
     public class Ship
@@ -21,7 +19,8 @@ namespace Asteroids.Objects
         Polygon shipGraphic;
         Polygon flame;
 
-        KeyboardState stateOld;
+        KeyboardState keyboardstateOld;
+        MouseState mousestateOld;
 
         GameEngine gameState;
 
@@ -72,9 +71,9 @@ namespace Asteroids.Objects
                 Transform.Rotation += GameEngine.deltaTime * 180;
             }
 
-            if (state.IsKeyDown(Keys.Space) && stateOld.IsKeyUp(Keys.Space))
+            if ((state.IsKeyDown(Keys.Space) && mousestateOld.IsKeyUp(Keys.Space)) || Mouse.GetState().LeftButton == ButtonState.Pressed)
             {
-                gameState.CreateBullet(Transform.Position+Transform.Forward*24,Transform.Forward);
+                gameState.CreateBullet(Transform.Position + Transform.Forward * 24, Transform.Forward);
             }
 
             Transform.Position += velocity * GameEngine.deltaTime;
@@ -82,27 +81,27 @@ namespace Asteroids.Objects
 
             BorderWrap();
 
-            stateOld = state;
+            mousestateOld = state;
         }
 
         public void BorderWrap()
         {
-            if (Transform.Position.Y < (-GameEngine.WINDOW_HEIGHT / 2) - 30)
+            if (Transform.Position.Y < (-GameEngine.WINDOW_HEIGHT / 2))
             {
-                Transform.Position.Y += GameEngine.WINDOW_HEIGHT + 60;
+                Transform.Position.Y += GameEngine.WINDOW_HEIGHT;
             }
-            else if (Transform.Position.Y > (GameEngine.WINDOW_HEIGHT / 2) + 30)
+            else if (Transform.Position.Y > (GameEngine.WINDOW_HEIGHT / 2))
             {
-                Transform.Position.Y -= GameEngine.WINDOW_HEIGHT + 60;
+                Transform.Position.Y -= GameEngine.WINDOW_HEIGHT;
             }
 
-            if (Transform.Position.X < (-GameEngine.WINDOW_WIDTH / 2) - 30)
+            if (Transform.Position.X < (-GameEngine.WINDOW_WIDTH / 2))
             {
-                Transform.Position.X += GameEngine.WINDOW_WIDTH + 60;
+                Transform.Position.X += GameEngine.WINDOW_WIDTH;
             }
-            else if (Transform.Position.X > (GameEngine.WINDOW_WIDTH / 2) + 30)
+            else if (Transform.Position.X > (GameEngine.WINDOW_WIDTH / 2))
             {
-                Transform.Position.X -= GameEngine.WINDOW_WIDTH + 60;
+                Transform.Position.X -= GameEngine.WINDOW_WIDTH;
             }
         }
 
