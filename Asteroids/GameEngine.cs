@@ -29,8 +29,9 @@ namespace Asteroids
         Bullet[] bullets;
 
         int score;
-        SpriteFont scoreFont;
+        SpriteFont font;
 
+        bool inMenu = true;
 
         public GameEngine()
         {
@@ -77,7 +78,7 @@ namespace Asteroids
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            scoreFont = Content.Load<SpriteFont>("Score");
+            font = Content.Load<SpriteFont>("Score");
 
             base.LoadContent();
         }
@@ -89,66 +90,74 @@ namespace Asteroids
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (inMenu == true)
             {
-                Exit();
-            }
-
-
-            deltaTime = gameTime.ElapsedGameTime.Milliseconds / 1000f;
-
-            if (Keyboard.GetState().IsKeyDown(Keys.F) == true)
-            {
-                deltaTime *= 5;
-            }
-
-            currentTime = (float)gameTime.TotalGameTime.TotalMilliseconds / 1000f;
-
-
-
-            player.Update();
-
-            for (int i = 0; i < asteroids.Count; i++)
-            {
-                asteroids[i].Update();
-                if (OverlapCircle(player.Transform.Position, asteroids[i].Transform.Position, asteroids[i].size * Asteroid.RADIUS) == true)
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 {
-                    ResetGame();
+                    Exit();
+                }
+
+                if (Keyboard.GetState().IsKeyDown(Keys.Space) == true)
+                {
+                    inMenu = false;
                 }
             }
-
-            for (int i = 0; i < bullets.Count(); i++)
+            else
             {
-                bullets[i].Update();
-
-                for (int j = 0; j < asteroids.Count; j++)
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 {
-                    if (bullets[i].Enabled == true)
+                    inMenu = true;
+                }
+
+                deltaTime = gameTime.ElapsedGameTime.Milliseconds / 1000f;
+
+                currentTime = (float)gameTime.TotalGameTime.TotalMilliseconds / 1000f;
+
+                player.Update();
+
+                for (int i = 0; i < asteroids.Count; i++)
+                {
+                    asteroids[i].Update();
+                    if (OverlapCircle(player.Transform.Position, asteroids[i].Transform.Position, asteroids[i].size * Asteroid.RADIUS) == true)
                     {
-                        if (OverlapCircle(bullets[i].Transform.Position, asteroids[j].Transform.Position, asteroids[j].size * Asteroid.RADIUS) == true)
+                        ResetGame();
+                        inMenu = true;
+                    }
+                }
+
+                for (int i = 0; i < bullets.Count(); i++)
+                {
+                    bullets[i].Update();
+
+                    for (int j = 0; j < asteroids.Count; j++)
+                    {
+                        if (bullets[i].Enabled == true)
                         {
-                            bullets[i].Enabled = false;
-                            if (asteroids[j].size > 1)
+                            if (OverlapCircle(bullets[i].Transform.Position, asteroids[j].Transform.Position, asteroids[j].size * Asteroid.RADIUS) == true)
                             {
-                                CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
-                                CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
-                            }
+                                bullets[i].Enabled = false;
+                                if (asteroids[j].size > 1)
+                                {
+                                    CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
+                                    CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
+                                }
 
-                            switch (asteroids[j].size)
-                            {
-                                case 3:
-                                    score += 100;
-                                    break;
-                                case 2:
-                                    score += 200;
-                                    break;
-                                case 1:
-                                    score += 250;
-                                    break;
-                            }
+                                switch (asteroids[j].size)
+                                {
+                                    case 3:
+                                        score += 100;
+                                        break;
+                                    case 2:
+                                        score += 200;
+                                        break;
+                                    case 1:
+                                        score += 250;
+                                        break;
+                                }
 
-                            asteroids.Remove(asteroids[j]);
-                            break;
+                                asteroids.Remove(asteroids[j]);
+                                break;
+                            }
                         }
                     }
                 }
@@ -159,27 +168,37 @@ namespace Asteroids
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
-
             Matrix center = Matrix.CreateTranslation(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 0);
 
             spriteBatch.Begin(transformMatrix: center);
             {
-                player.Draw(spriteBatch);
-
-                for (int i = 0; i < bullets.Length; i++)
+                if (inMenu == true)
                 {
-                    bullets[i].Draw(spriteBatch);
-                }
-                for (int i = 0; i < asteroids.Count; i++)
-                {
-                    asteroids[i].Draw(spriteBatch);
-                }
+                    string msg = "Press space to play";
 
-                spriteBatch.DrawString(scoreFont,score.ToString(), new Vector2(0, -(WINDOW_HEIGHT / 2) + 40), Color.White);
+                    Vector2 stringSize = font.MeasureString(msg);
+
+                    spriteBatch.DrawString(font, msg, new Vector2(-(stringSize.X / 2), (WINDOW_HEIGHT / 2) - 100), Color.White);
+                }
+                else
+                {
+                    GraphicsDevice.Clear(Color.Black);
+
+                    player.Draw(spriteBatch);
+
+                    for (int i = 0; i < bullets.Length; i++)
+                    {
+                        bullets[i].Draw(spriteBatch);
+                    }
+                    for (int i = 0; i < asteroids.Count; i++)
+                    {
+                        asteroids[i].Draw(spriteBatch);
+                    }
+
+                    spriteBatch.DrawString(font, score.ToString(), new Vector2(0, -(WINDOW_HEIGHT / 2) + 40), Color.White);
+                }
             }
             spriteBatch.End();
-
             base.Draw(gameTime);
         }
 
