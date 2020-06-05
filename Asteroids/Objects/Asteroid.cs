@@ -10,22 +10,10 @@ namespace Asteroids.Objects
 {
     class Asteroid
     {
-        private bool enabled;
-        public bool Enabled
-        {
-            get
-            {
-                return enabled;
-            }
-            set
-            {
-                enabled = value;
-                OnEnabled();
-            }
-        }
+        public const int RADIUS = 24;
 
         private Polygon shape;
-        public int radius;
+        public readonly int size;
         static Random random = new Random();
 
         public Transform2D Transform;
@@ -33,11 +21,11 @@ namespace Asteroids.Objects
         float speed;
         float rotationSpeed = 1;
 
-        void OnEnabled()
+        public Asteroid(int size)
         {
-            List<Vector2> verts = new List<Vector2>();
+            this.size = size;
 
-            radius = random.Next(1, 5) * 24;
+            List<Vector2> verts = new List<Vector2>();
 
             rotationSpeed = 10 + ((float)random.NextDouble() * 50);
 
@@ -47,19 +35,24 @@ namespace Asteroids.Objects
             }
 
             const double max = 2.0 * Math.PI;
-            double step = max / random.Next(5, 12);
+            double step = max / random.Next(7, 12);
 
             for (double theta = 0.0; theta < max; theta += step)
             {
                 float radiusMult = 1f;
                 if (random.Next(0, 4) == 0 || theta == 0)
                 {
-                    radiusMult = (float)(0.5f + (random.NextDouble() * 0.5f));
+                    radiusMult = (float)(0.8f + (random.NextDouble() * 0.4f));
                 }
-                verts.Add(new Vector2((float)(radius * radiusMult * Math.Cos(theta)), (float)(radius * radiusMult * Math.Sin(theta))));
+                verts.Add(new Vector2((float)(size * RADIUS * radiusMult * Math.Cos(theta)), (float)(size * RADIUS * radiusMult * Math.Sin(theta))));
             }
 
-            speed = 2 + ((float)random.NextDouble() * 4) * (1 / radius);
+            speed = 2+((float)random.NextDouble()*2);
+
+            if (size == 1)
+            {
+                speed += 2;
+            }
 
             shape = new Polygon(verts.ToArray());
 
@@ -95,20 +88,10 @@ namespace Asteroids.Objects
 
         public void Update()
         {
-            if (Enabled == true)
-            {
-                BorderWrap();
-            }
-
             Transform.Position += direction * speed * GameEngine.deltaTime * 20;
             Transform.Rotation += rotationSpeed * GameEngine.deltaTime;
-        }
 
-        public void Destroy(GameEngine gameEngine)
-        {
-
-
-            Enabled = false;
+            BorderWrap();
         }
 
         public void BorderWrap()
@@ -134,11 +117,8 @@ namespace Asteroids.Objects
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (Enabled == true)
-            {
-                shape.Transform = Transform;
-                shape.Draw(spriteBatch, true);
-            }
+            shape.Transform = Transform;
+            shape.Draw(spriteBatch, true);
         }
     }
 }

@@ -47,7 +47,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Engine\Camera2D.cs" />
-    <Compile Include="Engine\Collider2D.cs" />
     <Compile Include="Engine\Transform2D.cs" />
     <Compile Include="GameEngine.cs" />
     <Compile Include="Objects\Asteroid.cs" />

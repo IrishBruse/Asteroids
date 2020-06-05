@@ -71,7 +71,7 @@ namespace Asteroids.Objects
                 Transform.Rotation += GameEngine.deltaTime * 180;
             }
 
-            if ((state.IsKeyDown(Keys.Space) && mousestateOld.IsKeyUp(Keys.Space)) || Mouse.GetState().LeftButton == ButtonState.Pressed)
+            if ((state.IsKeyDown(Keys.Space) && keyboardstateOld.IsKeyUp(Keys.Space)) || (Mouse.GetState().LeftButton == ButtonState.Pressed&& mousestateOld.LeftButton == ButtonState.Released))
             {
                 gameState.CreateBullet(Transform.Position + Transform.Forward * 24, Transform.Forward);
             }
@@ -81,7 +81,8 @@ namespace Asteroids.Objects
 
             BorderWrap();
 
-            mousestateOld = state;
+            keyboardstateOld = state;
+            mousestateOld = Mouse.GetState();
         }
 
         public void BorderWrap()

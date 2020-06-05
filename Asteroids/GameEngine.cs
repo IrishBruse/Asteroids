@@ -23,10 +23,14 @@ namespace Asteroids
         Ship player;
 
         int enabledAsteroids;
-        List<Asteroid> asteroids = new List<Asteroid>();
+        List<Asteroid> asteroids;
 
         int currentBullet = 0;
         Bullet[] bullets;
+
+        int score;
+        SpriteFont scoreFont;
+
 
         public GameEngine()
         {
@@ -46,6 +50,14 @@ namespace Asteroids
 
             Content.RootDirectory = "Content";
 
+            ResetGame();
+
+            base.Initialize();
+        }
+
+        private void ResetGame()
+        {
+            score = 0;
             player = new Ship(this);
 
             bullets = new Bullet[10];
@@ -54,19 +66,18 @@ namespace Asteroids
                 bullets[i] = new Bullet();
             }
 
-            for (int i = 0; i < 10; i++)
+            asteroids = new List<Asteroid>();
+            for (int i = 0; i < 4; i++)
             {
-                asteroids.Add(new Asteroid());
-                asteroids[i].Enabled = true;
+                asteroids.Add(new Asteroid(3));
                 enabledAsteroids++;
             }
-
-            base.Initialize();
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            scoreFont = Content.Load<SpriteFont>("Score");
 
             base.LoadContent();
         }
@@ -78,6 +89,12 @@ namespace Asteroids
 
         protected override void Update(GameTime gameTime)
         {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();
+            }
+
+
             deltaTime = gameTime.ElapsedGameTime.Milliseconds / 1000f;
 
             if (Keyboard.GetState().IsKeyDown(Keys.F) == true)
@@ -87,18 +104,17 @@ namespace Asteroids
 
             currentTime = (float)gameTime.TotalGameTime.TotalMilliseconds / 1000f;
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            {
-                Exit();
-            }
+
 
             player.Update();
-
-
 
             for (int i = 0; i < asteroids.Count; i++)
             {
                 asteroids[i].Update();
+                if (OverlapCircle(player.Transform.Position, asteroids[i].Transform.Position, asteroids[i].size * Asteroid.RADIUS) == true)
+                {
+                    ResetGame();
+                }
             }
 
             for (int i = 0; i < bullets.Count(); i++)
@@ -107,10 +123,33 @@ namespace Asteroids
 
                 for (int j = 0; j < asteroids.Count; j++)
                 {
-                    if (OverlapCircle(bullets[i].Transform.Position, asteroids[j].Transform.Position, asteroids[j].radius) == true)
+                    if (bullets[i].Enabled == true)
                     {
-                        bullets[i].Enabled = false;
-                        asteroids[j].Destroy(this);
+                        if (OverlapCircle(bullets[i].Transform.Position, asteroids[j].Transform.Position, asteroids[j].size * Asteroid.RADIUS) == true)
+                        {
+                            bullets[i].Enabled = false;
+                            if (asteroids[j].size > 1)
+                            {
+                                CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
+                                CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
+                            }
+
+                            switch (asteroids[j].size)
+                            {
+                                case 3:
+                                    score += 100;
+                                    break;
+                                case 2:
+                                    score += 200;
+                                    break;
+                                case 1:
+                                    score += 250;
+                                    break;
+                            }
+
+                            asteroids.Remove(asteroids[j]);
+                            break;
+                        }
                     }
                 }
             }
@@ -128,11 +167,16 @@ namespace Asteroids
             {
                 player.Draw(spriteBatch);
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < bullets.Length; i++)
                 {
                     bullets[i].Draw(spriteBatch);
+                }
+                for (int i = 0; i < asteroids.Count; i++)
+                {
                     asteroids[i].Draw(spriteBatch);
                 }
+
+                spriteBatch.DrawString(scoreFont,score.ToString(), new Vector2(0, -(WINDOW_HEIGHT / 2) + 40), Color.White);
             }
             spriteBatch.End();
 
@@ -153,7 +197,15 @@ namespace Asteroids
 
         public bool OverlapCircle(Vector2 point, Vector2 center, float radius)
         {
-            return (point - center).LengthSquared() < radius * radius * 0.9f;
+            return (point - center).LengthSquared() < radius * radius;
+        }
+
+        public void CreateAsteroid(Vector2 position, int size)
+        {
+            Asteroid asteroid = new Asteroid(size);
+            asteroid.Transform.Position = position;
+
+            asteroids.Add(asteroid);
         }
     }
 }
