@@ -208,7 +208,7 @@ namespace Asteroids
         {
             currentWave++;
 
-            for (int i = 0; i < currentWave * 2; i++)
+            for (int i = 0; i < currentWave * currentWave; i++)
             {
                 asteroids.Add(new Asteroid(3));
                 enabledAsteroids++;
