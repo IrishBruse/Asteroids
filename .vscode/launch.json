@@ -9,10 +9,10 @@
             "name": "Debug Asteroids",
             "type": "coreclr",
             "request": "launch",
-            "cwd": "${workspaceFolder}/Asteroids",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Asteroids/bin/Debug/net5.0/Asteroids.dll",
+            "cwd": "${workspaceFolder}/Asteroids",
             "args": [],
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
