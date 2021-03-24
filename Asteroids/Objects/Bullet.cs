@@ -1,8 +1,8 @@
-﻿using Asteroids.Engine;
-
+﻿using System;
+using Asteroids.Engine;
+using Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using Utility.Drawing;
 
 namespace Asteroids.Objects
@@ -29,19 +29,19 @@ namespace Asteroids.Objects
 
         public void OnEnabled()
         {
-            creationTime = GameEngine.currentTime;
+            creationTime = Time.ElapsedTime;
         }
 
         public void Update()
         {
             if (Enabled == true)
             {
-                if (GameEngine.currentTime > creationTime+2)
+                if (Time.ElapsedTime > creationTime + 2)
                 {
                     enabled = false;
                 }
 
-                Transform.Position += Transform.Forward * GameEngine.deltaTime * 400;
+                Transform.Position += Transform.Forward * Time.DeltaTime * 400;
             }
         }
 

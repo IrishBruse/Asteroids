@@ -4,8 +4,8 @@
     {
         static void Main()
         {
-            using (GameEngine game = new GameEngine())
-                game.Run();
+            using AsteroidsGame game = new();
+            game.Run();
         }
     }
 }

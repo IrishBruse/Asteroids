@@ -1,10 +1,7 @@
-﻿using Asteroids.Engine;
-
+﻿using System;
+using Asteroids.Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using System;
-
 using Utility.Drawing;
 
 namespace Asteroids.Objects
@@ -12,14 +9,13 @@ namespace Asteroids.Objects
     class Polygon
     {
         public Transform2D Transform;
-
-        Vector2[] vertices;
+        readonly Vector2[] vertices;
         public Polygon(Vector2[] points)
         {
             vertices = points;
         }
 
-        public void Draw(SpriteBatch spriteBatch,bool closed)
+        public void Draw(SpriteBatch spriteBatch, bool closed)
         {
             Vector2[] verts = new Vector2[vertices.Length];
 

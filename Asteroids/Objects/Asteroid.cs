@@ -1,31 +1,30 @@
-﻿using Asteroids.Engine;
-
+﻿using System;
+using System.Collections.Generic;
+using Asteroids.Engine;
+using Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using System;
-using System.Collections.Generic;
-
 namespace Asteroids.Objects
 {
-    class Asteroid
+    internal class Asteroid
     {
         public const int RADIUS = 24;
 
-        private Polygon shape;
+        private readonly Polygon shape;
         public readonly int size;
-        static Random random = new Random();
+        private static readonly Random random = new();
 
         public Transform2D Transform;
         public Vector2 direction;
-        float speed;
-        float rotationSpeed = 1;
+        private readonly float speed;
+        private readonly float rotationSpeed = 1;
 
         public Asteroid(int size)
         {
             this.size = size;
 
-            List<Vector2> verts = new List<Vector2>();
+            List<Vector2> verts = new();
 
             rotationSpeed = 10 + ((float)random.NextDouble() * 50);
 
@@ -42,12 +41,12 @@ namespace Asteroids.Objects
                 float radiusMult = 1f;
                 if (random.Next(0, 4) == 0 || theta == 0)
                 {
-                    radiusMult = (float)(0.8f + (random.NextDouble() * 0.4f));
+                    radiusMult = (float)(0.4f + (random.NextDouble() * 0.6f));
                 }
                 verts.Add(new Vector2((float)(size * RADIUS * radiusMult * Math.Cos(theta)), (float)(size * RADIUS * radiusMult * Math.Sin(theta))));
             }
 
-            speed = 2+((float)random.NextDouble()*2);
+            speed = 2 + ((float)random.NextDouble() * 2);
 
             if (size == 1)
             {
@@ -56,10 +55,10 @@ namespace Asteroids.Objects
 
             shape = new Polygon(verts.ToArray());
 
-            Rectangle edge = new Rectangle(-GameEngine.WINDOW_WIDTH / 2, -GameEngine.WINDOW_HEIGHT / 2, GameEngine.WINDOW_WIDTH, GameEngine.WINDOW_HEIGHT);
-            float a = GameEngine.WINDOW_HEIGHT;
-            float b = GameEngine.WINDOW_WIDTH;
-            float edgeLength = 2 * a + 2 * b;
+            Rectangle edge = new(-AsteroidsGame.WINDOW_WIDTH / 2, -AsteroidsGame.WINDOW_HEIGHT / 2, AsteroidsGame.WINDOW_WIDTH, AsteroidsGame.WINDOW_HEIGHT);
+            float a = AsteroidsGame.WINDOW_HEIGHT;
+            float b = AsteroidsGame.WINDOW_WIDTH;
+            float edgeLength = (2 * a) + (2 * b);
 
             float randomEdgeLength = (float)random.NextDouble() * edgeLength;
 
@@ -71,13 +70,11 @@ namespace Asteroids.Objects
             {
                 Transform.Position = new Vector2(edge.Right + randomEdgeLength - a, edge.Bottom + edge.Size.Y);
             }
-            else if (randomEdgeLength < (a + b) + a)
-            {
-                Transform.Position = new Vector2(edge.Right + edge.Width, edge.Top + randomEdgeLength - (a + b));
-            }
             else
             {
-                Transform.Position = new Vector2(edge.Left + randomEdgeLength - (a + b + a), edge.Top);
+                Transform.Position = randomEdgeLength < a + b + a
+                    ? new Vector2(edge.Right + edge.Width, edge.Top + randomEdgeLength - (a + b))
+                    : new Vector2(edge.Left + randomEdgeLength - (a + b + a), edge.Top);
             }
 
             direction.X = (float)random.NextDouble() - .5f;
@@ -88,30 +85,30 @@ namespace Asteroids.Objects
 
         public void Update()
         {
-            Transform.Position += direction * speed * GameEngine.deltaTime * 20;
-            Transform.Rotation += rotationSpeed * GameEngine.deltaTime;
+            Transform.Position += direction * speed * Time.DeltaTime * 20;
+            Transform.Rotation += rotationSpeed * Time.DeltaTime;
 
             BorderWrap();
         }
 
         public void BorderWrap()
         {
-            if (Transform.Position.Y < (-GameEngine.WINDOW_HEIGHT / 2) - 1)
+            if (Transform.Position.Y < (-AsteroidsGame.WINDOW_HEIGHT / 2) - 1)
             {
-                Transform.Position.Y += GameEngine.WINDOW_HEIGHT + 2;
+                Transform.Position.Y += AsteroidsGame.WINDOW_HEIGHT + 2;
             }
-            else if (Transform.Position.Y > (GameEngine.WINDOW_HEIGHT / 2) + 1)
+            else if (Transform.Position.Y > (AsteroidsGame.WINDOW_HEIGHT / 2) + 1)
             {
-                Transform.Position.Y -= GameEngine.WINDOW_HEIGHT + 2;
+                Transform.Position.Y -= AsteroidsGame.WINDOW_HEIGHT + 2;
             }
 
-            if (Transform.Position.X < (-GameEngine.WINDOW_WIDTH / 2) - 1)
+            if (Transform.Position.X < (-AsteroidsGame.WINDOW_WIDTH / 2) - 1)
             {
-                Transform.Position.X += GameEngine.WINDOW_WIDTH + 2;
+                Transform.Position.X += AsteroidsGame.WINDOW_WIDTH + 2;
             }
-            else if (Transform.Position.X > (GameEngine.WINDOW_WIDTH / 2) + 1)
+            else if (Transform.Position.X > (AsteroidsGame.WINDOW_WIDTH / 2) + 1)
             {
-                Transform.Position.X -= GameEngine.WINDOW_WIDTH + 2;
+                Transform.Position.X -= AsteroidsGame.WINDOW_WIDTH + 2;
             }
         }
 

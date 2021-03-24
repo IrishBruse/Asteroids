@@ -1,39 +1,30 @@
-﻿using Asteroids.Objects;
-
+﻿using System.Collections.Generic;
+using System.IO;
+using Asteroids.Objects;
+using Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-using System.Collections.Generic;
-using System.Linq;
+using SpriteFontPlus;
 
 namespace Asteroids
 {
-    public class GameEngine : Game
+    public class AsteroidsGame : Game
     {
-        public static float currentTime;
-        public static float deltaTime;
-
         public const int WINDOW_WIDTH = 1280;
         public const int WINDOW_HEIGHT = 720;
+        private readonly GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        private Ship player;
+        private List<Asteroid> asteroids;
+        private int currentWave;
+        private int currentBullet;
+        private Bullet[] bullets;
+        private SpriteFont font;
+        private SpriteFont titleFont;
+        private bool inMenu = true;
 
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-
-        Ship player;
-
-        int enabledAsteroids;
-        List<Asteroid> asteroids;
-        int currentWave;
-
-        int currentBullet = 0;
-        Bullet[] bullets;
-
-        SpriteFont font;
-
-        bool inMenu = true;
-
-        public GameEngine()
+        public AsteroidsGame()
         {
             graphics = new GraphicsDeviceManager(this);
         }
@@ -45,11 +36,9 @@ namespace Asteroids
 
             // Enable AA
             graphics.PreferMultiSampling = true;
-            GraphicsDevice.PresentationParameters.MultiSampleCount = 4;
+            GraphicsDevice.PresentationParameters.MultiSampleCount = 8;
 
             graphics.ApplyChanges();
-
-            Content.RootDirectory = "Content";
 
             ResetGame();
 
@@ -74,7 +63,35 @@ namespace Asteroids
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            font = Content.Load<SpriteFont>("Score");
+            var fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
+            24,
+            1024,
+            512,
+            new[]
+            {
+                CharacterRange.BasicLatin,
+                CharacterRange.Latin1Supplement,
+                CharacterRange.LatinExtendedA,
+                CharacterRange.Cyrillic
+            }
+            );
+
+            font = fontBakeResult.CreateSpriteFont(GraphicsDevice);
+
+            fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
+            128,
+            1024,
+            1024,
+            new[]
+            {
+                CharacterRange.BasicLatin,
+                CharacterRange.Latin1Supplement,
+                CharacterRange.LatinExtendedA,
+                CharacterRange.Cyrillic
+            }
+            );
+
+            titleFont = fontBakeResult.CreateSpriteFont(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -86,9 +103,9 @@ namespace Asteroids
 
         protected override void Update(GameTime gameTime)
         {
-            if (inMenu == true)
+            if (inMenu)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) == true)
+                if (Keyboard.GetState().IsKeyDown(Keys.Space))
                 {
                     inMenu = false;
                 }
@@ -100,9 +117,9 @@ namespace Asteroids
                     inMenu = true;
                 }
 
-                deltaTime = gameTime.ElapsedGameTime.Milliseconds / 1000f;
+                Time.DeltaTime = gameTime.ElapsedGameTime.Milliseconds / 1000f;
 
-                currentTime = (float)gameTime.TotalGameTime.TotalMilliseconds / 1000f;
+                Time.ElapsedTime = (float)gameTime.TotalGameTime.TotalMilliseconds / 1000f;
 
                 player.Update();
 
@@ -114,22 +131,22 @@ namespace Asteroids
                 for (int i = 0; i < asteroids.Count; i++)
                 {
                     asteroids[i].Update();
-                    if (OverlapCircle(player.Transform.Position, asteroids[i].Transform.Position, asteroids[i].size * Asteroid.RADIUS) == true)
+                    if (OverlapCircle(player.Transform.Position, asteroids[i].Transform.Position, asteroids[i].size * Asteroid.RADIUS))
                     {
                         ResetGame();
                         inMenu = true;
                     }
                 }
 
-                for (int i = 0; i < bullets.Count(); i++)
+                for (int i = 0; i < bullets.Length; i++)
                 {
                     bullets[i].Update();
 
                     for (int j = 0; j < asteroids.Count; j++)
                     {
-                        if (bullets[i].Enabled == true)
+                        if (bullets[i].Enabled)
                         {
-                            if (OverlapCircle(bullets[i].Transform.Position, asteroids[j].Transform.Position, asteroids[j].size * Asteroid.RADIUS) == true)
+                            if (OverlapCircle(bullets[i].Transform.Position, asteroids[j].Transform.Position, asteroids[j].size * Asteroid.RADIUS))
                             {
                                 bullets[i].Enabled = false;
                                 if (asteroids[j].size > 1)
@@ -138,7 +155,7 @@ namespace Asteroids
                                     CreateAsteroid(asteroids[j].Transform.Position, asteroids[j].size - 1);
                                 }
 
-                                asteroids.Remove(asteroids[j]);
+                                _ = asteroids.Remove(asteroids[j]);
                                 break;
                             }
                         }
@@ -155,13 +172,20 @@ namespace Asteroids
 
             spriteBatch.Begin(transformMatrix: center);
             {
-                if (inMenu == true)
+                if (inMenu)
                 {
-                    string msg = "Press space to play";
+                    string titleMessage = "Asteroids";
+                    Vector2 titleSize = titleFont.MeasureString(titleMessage);
+                    spriteBatch.DrawString(titleFont, titleMessage, -titleSize * 0.5f, Color.White);
 
-                    Vector2 stringSize = font.MeasureString(msg);
+                    string playMessage = "Press space to play";
+                    Vector2 playMessageSize = font.MeasureString(playMessage);
+                    spriteBatch.DrawString(font, playMessage, new Vector2(0, 80) - playMessageSize * 0.5f, Color.White);
 
-                    spriteBatch.DrawString(font, msg, new Vector2(-(stringSize.X / 2), (WINDOW_HEIGHT / 2) - 100), Color.White);
+                    string tutorialMessage = "WASD/Arrows keys to fly\nspace or left click to shoot";
+                    Vector2 tutorialMessageSize = font.MeasureString(tutorialMessage);
+                    spriteBatch.DrawString(font, tutorialMessage, new Vector2(0, 140) - tutorialMessageSize * 0.5f, Color.White);
+
                 }
                 else
                 {
@@ -199,7 +223,7 @@ namespace Asteroids
             }
         }
 
-        public bool OverlapCircle(Vector2 point, Vector2 center, float radius)
+        public static bool OverlapCircle(Vector2 point, Vector2 center, float radius)
         {
             return (point - center).LengthSquared() < radius * radius;
         }
@@ -211,13 +235,12 @@ namespace Asteroids
             for (int i = 0; i < currentWave * currentWave; i++)
             {
                 asteroids.Add(new Asteroid(3));
-                enabledAsteroids++;
             }
         }
 
         public void CreateAsteroid(Vector2 position, int size)
         {
-            Asteroid asteroid = new Asteroid(size);
+            Asteroid asteroid = new(size);
             asteroid.Transform.Position = position;
 
             asteroids.Add(asteroid);

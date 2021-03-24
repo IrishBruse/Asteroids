@@ -1,19 +1,18 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using System;
 
 namespace Engine
 {
     public class Camera2D
     {
-        private Matrix _transformationMatrix = Matrix.Identity;
-        private Matrix _inverseMatrix = Matrix.Identity;
-        private bool _hasChanged;
-        private Vector2 _position = Vector2.Zero;
-        private Vector2 _zoom = Vector2.One;
-        private Vector2 _origin = Vector2.Zero;
-        private float _rotation = 0;
+        private Matrix transformationMatrix = Matrix.Identity;
+        private Matrix inverseMatrix = Matrix.Identity;
+        private bool hasChanged;
+        private Vector2 position = Vector2.Zero;
+        private Vector2 zoom = Vector2.One;
+        private Vector2 origin = Vector2.Zero;
+        private float rotation;
         public Viewport Viewport;
 
         /// <summary>
@@ -23,9 +22,11 @@ namespace Engine
         /// <param name="height">The height of the viewport</param>
         public Camera2D(int width, int height)
         {
-            Viewport = new Viewport();
-            Viewport.Width = width;
-            Viewport.Height = height;
+            Viewport = new Viewport
+            {
+                Width = width,
+                Height = height
+            };
             Origin = new Vector2(width / 2, height / 2);
         }
 
@@ -39,39 +40,39 @@ namespace Engine
             //  Create a translation matrix based on the position of the camera
             Matrix positionTranslationMatrix = Matrix.CreateTranslation(new Vector3()
             {
-                X = -(int)Math.Floor(_position.X),
-                Y = -(int)Math.Floor(_position.Y),
+                X = -(int)Math.Floor(position.X),
+                Y = -(int)Math.Floor(position.Y),
                 Z = 0
             });
 
             //  Create a rotation matrix around the Z axis
-            Matrix rotationMatrix = Matrix.CreateRotationZ(_rotation);
+            Matrix rotationMatrix = Matrix.CreateRotationZ(rotation);
 
             //  Create a scale matrix based on the zoom
             Matrix scaleMatrix = Matrix.CreateScale(new Vector3()
             {
-                X = _zoom.X,
-                Y = _zoom.Y,
+                X = zoom.X,
+                Y = zoom.Y,
                 Z = 1
             });
 
             //  Create a translation matrix based on the origin position of the camera
             Matrix originTranslationMatrix = Matrix.CreateTranslation(new Vector3()
             {
-                X = (int)Math.Floor(_origin.X),
-                Y = (int)Math.Floor(_origin.Y),
+                X = (int)Math.Floor(origin.X),
+                Y = (int)Math.Floor(origin.Y),
                 Z = 0
             });
 
             //  Perform matrix multiplication of all of the above to create our
             //  transformation matrix
-            _transformationMatrix = positionTranslationMatrix * rotationMatrix * scaleMatrix * originTranslationMatrix;
+            transformationMatrix = positionTranslationMatrix * rotationMatrix * scaleMatrix * originTranslationMatrix;
 
             //  Get our inverse matrix of the transformation matrix
-            _inverseMatrix = Matrix.Invert(_transformationMatrix);
+            inverseMatrix = Matrix.Invert(transformationMatrix);
 
             //  Since the matrices have now been updated, set that there is no longer a change
-            _hasChanged = false;
+            hasChanged = false;
 
         }
 
@@ -84,11 +85,11 @@ namespace Engine
             {
                 //  If a change is detected, update matraces before
                 //  returning value
-                if (_hasChanged)
+                if (hasChanged)
                 {
                     UpdateMatrices();
                 }
-                return _transformationMatrix;
+                return transformationMatrix;
             }
         }
 
@@ -101,11 +102,11 @@ namespace Engine
             {
                 //  If a change is detected, update matraces before
                 //  returning value
-                if (_hasChanged)
+                if (hasChanged)
                 {
                     UpdateMatrices();
                 }
-                return _inverseMatrix;
+                return inverseMatrix;
             }
         }
 
@@ -115,17 +116,17 @@ namespace Engine
         /// </summary>
         public Vector2 Position
         {
-            get { return _position; }
+            get { return position; }
             set
             {
                 //  If the value hasn't actually changed, just return back
-                if (_position == value) { return; }
+                if (position == value) { return; }
 
                 //  Set the position value
-                _position = value;
+                position = value;
 
                 //  Flag that a change has been made
-                _hasChanged = true;
+                hasChanged = true;
             }
         }
 
@@ -134,17 +135,17 @@ namespace Engine
         /// </summary>
         public float Rotation
         {
-            get { return _rotation; }
+            get { return rotation; }
             set
             {
                 //  If the value hasn't actually changed, just return back
-                if (_rotation == value) { return; }
+                if (rotation == value) { return; }
 
                 //  Set the rotation value
-                _rotation = value;
+                rotation = value;
 
                 //  Flag that a change has been made
-                _hasChanged = true;
+                hasChanged = true;
             }
         }
 
@@ -153,17 +154,17 @@ namespace Engine
         /// </summary>
         public Vector2 Zoom
         {
-            get { return _zoom; }
+            get { return zoom; }
             set
             {
                 //  If the value hasn't actually changed, just return back
-                if (_zoom == value) { return; }
+                if (zoom == value) { return; }
 
                 //  Set the zoom value
-                _zoom = value;
+                zoom = value;
 
                 //  Flag that a change has been made
-                _hasChanged = true;
+                hasChanged = true;
             }
         }
 
@@ -173,17 +174,17 @@ namespace Engine
         /// </summary>
         public Vector2 Origin
         {
-            get { return _origin; }
+            get { return origin; }
             set
             {
                 //  If the value hasn't actually changed, just return back
-                if (_origin == value) { return; }
+                if (origin == value) { return; }
 
                 //  Set the origin value
-                _origin = value;
+                origin = value;
 
                 //  Flag that a change has been made
-                _hasChanged = true;
+                hasChanged = true;
             }
         }
 
@@ -193,17 +194,17 @@ namespace Engine
         /// </summary>
         public float X
         {
-            get { return _position.X; }
+            get { return position.X; }
             set
             {
                 //  If the value hasn't actually changed, just return back
-                if (_position.X == value) { return; }
+                if (position.X == value) { return; }
 
                 //  Set the position x value
-                _position.X = value;
+                position.X = value;
 
                 //  Flag that a change has been made
-                _hasChanged = true;
+                hasChanged = true;
             }
         }
 
@@ -213,17 +214,17 @@ namespace Engine
         /// </summary>
         public float Y
         {
-            get { return _position.Y; }
+            get { return position.Y; }
             set
             {
                 //  If the value hasn't actually changed, just return back
-                if (_position.Y == value) { return; }
+                if (position.Y == value) { return; }
 
                 //  Set the position y value
-                _position.Y = value;
+                position.Y = value;
 
                 //  Flag that a change has been made
-                _hasChanged = true;
+                hasChanged = true;
             }
         }
 

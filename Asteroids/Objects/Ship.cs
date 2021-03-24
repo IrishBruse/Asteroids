@@ -1,6 +1,6 @@
 ﻿
 using Asteroids.Engine;
-
+using Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,21 +10,16 @@ namespace Asteroids.Objects
     public class Ship
     {
         public Transform2D Transform;
+        private bool thrusting;
+        private int framesPassed;
+        private Vector2 velocity;
+        private readonly Polygon shipGraphic;
+        private readonly Polygon flame;
+        private KeyboardState keyboardstateOld;
+        private MouseState mousestateOld;
+        private readonly AsteroidsGame gameState;
 
-        bool thrusting;
-
-        int framesPassed;
-        Vector2 velocity;
-
-        Polygon shipGraphic;
-        Polygon flame;
-
-        KeyboardState keyboardstateOld;
-        MouseState mousestateOld;
-
-        GameEngine gameState;
-
-        public Ship(GameEngine gameEngine)
+        public Ship(AsteroidsGame gameEngine)
         {
             gameState = gameEngine;
             Transform.Position = Vector2.Zero;
@@ -64,19 +59,19 @@ namespace Asteroids.Objects
 
             if (state.IsKeyDown(Keys.A) || state.IsKeyDown(Keys.Left))
             {
-                Transform.Rotation -= GameEngine.deltaTime * 180;
+                Transform.Rotation -= Time.DeltaTime * 180;
             }
-            else if (state.IsKeyDown(Keys.D) || state.IsKeyDown(Keys.Up))
+            else if (state.IsKeyDown(Keys.D) || state.IsKeyDown(Keys.Right))
             {
-                Transform.Rotation += GameEngine.deltaTime * 180;
+                Transform.Rotation += Time.DeltaTime * 180;
             }
 
-            if ((state.IsKeyDown(Keys.Space) && keyboardstateOld.IsKeyUp(Keys.Space)) || (Mouse.GetState().LeftButton == ButtonState.Pressed&& mousestateOld.LeftButton == ButtonState.Released))
+            if ((state.IsKeyDown(Keys.Space) && keyboardstateOld.IsKeyUp(Keys.Space)) || (Mouse.GetState().LeftButton == ButtonState.Pressed && mousestateOld.LeftButton == ButtonState.Released))
             {
-                gameState.CreateBullet(Transform.Position + Transform.Forward * 24, Transform.Forward);
+                gameState.CreateBullet(Transform.Position + (Transform.Forward * 24), Transform.Forward);
             }
 
-            Transform.Position += velocity * GameEngine.deltaTime;
+            Transform.Position += velocity * Time.DeltaTime;
             velocity *= 0.99f;
 
             BorderWrap();
@@ -87,22 +82,22 @@ namespace Asteroids.Objects
 
         public void BorderWrap()
         {
-            if (Transform.Position.Y < (-GameEngine.WINDOW_HEIGHT / 2))
+            if (Transform.Position.Y < (-AsteroidsGame.WINDOW_HEIGHT / 2))
             {
-                Transform.Position.Y += GameEngine.WINDOW_HEIGHT;
+                Transform.Position.Y += AsteroidsGame.WINDOW_HEIGHT;
             }
-            else if (Transform.Position.Y > (GameEngine.WINDOW_HEIGHT / 2))
+            else if (Transform.Position.Y > (AsteroidsGame.WINDOW_HEIGHT / 2))
             {
-                Transform.Position.Y -= GameEngine.WINDOW_HEIGHT;
+                Transform.Position.Y -= AsteroidsGame.WINDOW_HEIGHT;
             }
 
-            if (Transform.Position.X < (-GameEngine.WINDOW_WIDTH / 2))
+            if (Transform.Position.X < (-AsteroidsGame.WINDOW_WIDTH / 2))
             {
-                Transform.Position.X += GameEngine.WINDOW_WIDTH;
+                Transform.Position.X += AsteroidsGame.WINDOW_WIDTH;
             }
-            else if (Transform.Position.X > (GameEngine.WINDOW_WIDTH / 2))
+            else if (Transform.Position.X > (AsteroidsGame.WINDOW_WIDTH / 2))
             {
-                Transform.Position.X -= GameEngine.WINDOW_WIDTH;
+                Transform.Position.X -= AsteroidsGame.WINDOW_WIDTH;
             }
         }
 
@@ -116,7 +111,7 @@ namespace Asteroids.Objects
 
             if (framesPassed <= 0)
             {
-                if (thrusting == true)
+                if (thrusting)
                 {
                     flame.Draw(spriteBatch, false);
                 }
